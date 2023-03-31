@@ -23,7 +23,7 @@ const getUserData = async () => {
     }
 }
 
-const addToCart = async (product) => {
+const addToCart = async (product, location) => {
     //const [cart, setCart] = useState([]);
     //const [user, setUser] = useState(null);
     // console.log("PRODUCT: ", product);
@@ -38,7 +38,7 @@ const addToCart = async (product) => {
 
 
         const check = cart_res.every(item => {
-            return item._id !== product._id;
+            return item._id !== product._id || item.location._id !== location._id;
         })
 
         let cartRespone;
@@ -47,7 +47,7 @@ const addToCart = async (product) => {
         if(check) {
 
 
-            cartRespone = await axios.patch('http://10.0.2.2:8000/v1/user/addCart', {cart: [...cart_res, {...product, quantity: 1}] }, {
+            cartRespone = await axios.patch('http://10.0.2.2:8000/v1/user/addCart', {cart: [...cart_res, {...product, quantity: 1, location: location}] }, {
                 headers: {token: `Bearer ${getToken()}`}
             })
 
@@ -56,7 +56,7 @@ const addToCart = async (product) => {
         else{
 
             cart_res.forEach(item => {
-                if(item._id === product._id){
+                if(item._id === product._id && item.location._id === location._id){
                     
                     item.quantity += 1
                     // if(item.quantity > 2) {
@@ -85,7 +85,7 @@ const addToCart = async (product) => {
 
 
 
-const removeFromCart = async (product) => {
+const removeFromCart = async (product, location) => {
     //const [cart, setCart] = useState([]);
     //const [user, setUser] = useState(null);
 
@@ -102,31 +102,18 @@ const removeFromCart = async (product) => {
 
         
         cartData.forEach((item, index) => {
-            if(item._id === product._id){
+            if(item._id === product._id && item.location?._id === location._id){
                 //cartData.splice(index, 1)
-
                 item.quantity === 1 ? cartData.splice(index, 1) : item.quantity -= 1
             }
         })
 
-
-
-
-        //console.log("CART SPLICE: ", cart);
 
        
         let cartRespone = await axios.patch('http://10.0.2.2:8000/v1/user/addCart', {cart: [...cartData] }, {
             headers: {token: `Bearer ${getToken()}`}
         })         
         
-
-        
-        // let cartRespone = await axios.patch('http://10.0.2.2:8000/v1/user/addCart', {cart: [...cart, {...product, quantity: 1}] }, {
-        //     headers: {token: `Bearer ${getToken}`}
-        // })
-
-        //const user = getUserData();
-        //console.log("User: ");
         return cartRespone;
 
     } catch(error) {
@@ -138,5 +125,86 @@ const removeFromCart = async (product) => {
 }
 
 
+const getBookmarks = async () => {
+    try{
 
-export default {getUserData, addToCart, removeFromCart};
+        let userResponse = await axios.get('http://10.0.2.2:8000/v1/user/infor', {
+            headers: {token: `Bearer ${getToken()}`}
+        })
+
+        let bookmarksData = userResponse?.data?.bookmark;
+        
+        return bookmarksData;
+
+    } catch(error) {
+        return {
+            status: false,
+            message: "Bookmark data not found",
+        }
+    }
+}
+
+const addBookmark = async (product, location) => {
+    try{
+
+        let userResponse = await axios.get('http://10.0.2.2:8000/v1/user/infor', {
+            headers: {token: `Bearer ${getToken()}`}
+        })
+
+        let bookmarksData = userResponse?.data?.bookmark;
+        let bookmarkRespone = await axios.patch('http://10.0.2.2:8000/v1/user/addBookmark', {bookmark: [...bookmarksData, {...product, location: location}] }, {
+            headers: {token: `Bearer ${getToken()}`}
+        })
+
+        return bookmarkRespone;
+
+    } catch(error) {
+        return {
+            status: false,
+            message: "Bookmark added failed",
+        }
+    }
+}
+
+
+const removeBookmark = async (product, location) => {
+    try{
+
+        let userResponse = await axios.get('http://10.0.2.2:8000/v1/user/infor', {
+            headers: {token: `Bearer ${getToken()}`}
+        })
+
+        let bookmarksData = userResponse?.data?.bookmark;
+
+
+        bookmarksData.forEach((item, index) => {
+            if(item._id === product._id && item.location?._id === location._id){
+                //cartData.splice(index, 1)
+                bookmarksData.splice(index, 1)
+            }
+        })
+
+        let bookmarkRespone = await axios.patch('http://10.0.2.2:8000/v1/user/addBookmark', {bookmark: [...bookmarksData] }, {
+            headers: {token: `Bearer ${getToken()}`}
+        })
+
+        return bookmarkRespone;
+
+    } catch(error) {
+        return {
+            status: false,
+            message: "Bookmark remove failed",
+        }
+    }
+}
+
+
+
+export default {
+    getUserData, 
+    addToCart, 
+    removeFromCart, 
+    addBookmark, 
+    removeBookmark, 
+    getBookmarks
+};

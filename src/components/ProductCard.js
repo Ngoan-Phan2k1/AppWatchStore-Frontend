@@ -22,53 +22,74 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 
 
 import {useDispatch, useSelector} from "react-redux";
-import {CartAction} from "../actions";
+import {CartAction, BookmarkAction} from "../actions";
 
 
-const ProductCard = (/*{_id, product_id, name, images, thumnails, price, desription}*/props) => {
-    //const [itemCount, setItemCount] = useState(0);
+const ProductCard = ({props, navigate, location} /*props*/) => {
     const [click, setClick] = useState(false);
     const dispatch = useDispatch();
-
-
-    //console.log(props)
-
-    useEffect(() => {
-        // UserService.getUserData().then(userResponse => {
-        //     console.log("User Response Cart: ", userResponse?.data?.cart?.length)
-        // })
-
-        //console.log("CART: ", cart.length);
-        
-    }, [click])
-
+    // const [isBookmarked, setIsBookmarked] = useState(false);
 
     
     // const cart = useSelector(state => state?.cartState?.cart)
-    // console.log("CART: ", cart);
+    // console.log("Cart: ", cart)
 
-    const itemCount = useSelector(state => state?.cartState?.cart?.find(item => item?._id === props._id)?.quantity)
+    const itemCount = useSelector(state => state?.cartState?.cart?.find(item => item?._id === props._id && item?.location?._id === location?._id)?.quantity)
 
-    const addToCart = (props) => {
-        //console.log("Prop: ", props);
-       dispatch(CartAction.addCart(props))  
-    }
-
-    const removeFromCart = (props) => dispatch(
-        CartAction.removeCart(props)
+    const isBookmarked = useSelector(
+        state => 
+        state?.bookmarkState?.bookmarks?.filter(
+            item => item?._id === props._id && item?.location?._id === location?._id).length > 0
     )
 
+    // const isBookmarked = useSelector(
+    //     state => 
+    //     state?.bookmarkState?.bookmarks
+    // )
+
+
+
+
+    const addBookmark = (props, location) => {
+        dispatch(BookmarkAction.addBookmark(props, location))
+    }
+
+    const removeBookmark = (props, location) => {
+        dispatch(BookmarkAction.removeBookmark(props, location))
+    }
+
+    const addToCart = (props, warehouseId) => {
+        //console.log("Prop: ", props);
+       dispatch(CartAction.addCart(props, warehouseId))  
+    }
+
+    const removeFromCart = (props, warehouseId) => dispatch(
+        CartAction.removeCart(props, warehouseId)
+    )
 
         
     return (
         <View style={styles.container}>
-            <TouchableOpacity onPress={() => props.navigate()} activeOpacity={0.8}>
+            <TouchableOpacity onPress={() => navigate()} activeOpacity={0.8}>
                 <Image style={styles.image} source={{uri: props.images.url}}/>
             </TouchableOpacity>
 
             <View style={styles.detailsContainer}>
                 <TouchableOpacity onPress={() => navigate()} activeOpacity={0.8}>
-                    <Text numberOfLines={1} style={styles.titleText}>{props.name}</Text>
+                    <View style={styles.titleContainer}>
+                        <Text numberOfLines={1} style={styles.titleText}>{props.name}</Text>
+                        <Ionicons 
+                            name={isBookmarked? "bookmark": "bookmark-outline"} 
+                            color={Colors.DEFAULT_YELLOW} 
+                            size={19}
+                            onPress={() => 
+                                isBookmarked ? removeBookmark(props, location) : addBookmark(props, location) 
+                            }
+                        />
+
+                    </View>
+                    
+                    
                     <Text numberOfLines={2} style={styles.descriptionText}>{props.desription}</Text>
                 </TouchableOpacity>
                 <View style={styles.footerContainer}>
@@ -82,7 +103,7 @@ const ProductCard = (/*{_id, product_id, name, images, thumnails, price, desript
                                         name="minus"
                                         color={Colors.DEFAULT_YELLOW}
                                         size={18}
-                                        onPress={() => removeFromCart(props)}
+                                        onPress={() => removeFromCart(props, location)}
                                     />
                                     <Text style={styles.itemCountText}>{itemCount}</Text>
                                 </>
@@ -96,7 +117,7 @@ const ProductCard = (/*{_id, product_id, name, images, thumnails, price, desript
                             name="plus"
                             color={Colors.DEFAULT_YELLOW}
                             size={18}
-                            onPress={() => addToCart(props)}
+                            onPress={() => addToCart(props, location)}
                         />
                     </View>
                 </View>
@@ -123,7 +144,12 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     detailsContainer: {
-        marginHorizontal: 5,
+         marginHorizontal: 5,
+    },
+    titleContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginHorizontal: -10,
     },
     titleText: {
         width: Display.setWidth(60),
@@ -151,7 +177,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        marginHorizontal: 5,
+        // marginHorizontal: 5,
     },
     itemAddContainer: {
         flexDirection: "row",

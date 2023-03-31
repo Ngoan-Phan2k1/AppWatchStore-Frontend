@@ -9,6 +9,9 @@ import HomeScreen from "./HomeScreen";
 import WarehouseScreen from "./WarehouseScreen";
 import CartScreen from "./CartScreen";
 import ProductScreen from "./ProductScreen";
+import BookmarkScreen from "./BookmarkScreen";
+import AccountScreen from "./AccountScreen";
+import PayPalScreen from "./PayPalScreen";
 
 export {
     SplashScreen, 
@@ -22,4 +25,7 @@ export {
     WarehouseScreen,
     CartScreen,
     ProductScreen,
+    BookmarkScreen,
+    AccountScreen,
+    PayPalScreen,
 };

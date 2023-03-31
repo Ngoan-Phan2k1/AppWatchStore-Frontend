@@ -30,7 +30,11 @@ import {CartAction} from "../actions";
 
 const CartScreen = ({navigation}) => {
     const cart = useSelector(state => state?.cartState?.cart);
+    const user = useSelector(state => state?.generalState?.userData);
+
     const [total, setTotal] = useState(0);
+    const [totalUSD, setTotalUSD] = useState(0);
+
 
     useEffect(() => {
         const getTotal = () => {
@@ -39,6 +43,7 @@ const CartScreen = ({navigation}) => {
                 return prev + (item.price * item.quantity)
             },0)
             setTotal(total);
+            setTotalUSD((total/23000).toFixed(2));
         
         }
         getTotal();
@@ -65,10 +70,11 @@ const CartScreen = ({navigation}) => {
                         <View style={styles.productList}>
                             {cart?.map((item, index) => (
                                 <ProductCard 
-                                    {...item} 
+                                    props={item}
                                     key={item?._id}
+                                    location={item?.location}
                                     navigate={() => 
-                                        navigation.navigate("Product", {id: item?._id})}
+                                        navigation.navigate("Product", {id: item?._id, location: item?.location.location, warehouseId: item?.location?._id})}
                                 />
                             ))}
                         </View>
@@ -107,7 +113,13 @@ const CartScreen = ({navigation}) => {
                         <TouchableOpacity style={styles.checkoutButton}>
                             <View style={styles.rowAndCenter}>
                                     <Ionicons name="cart-outline" color={Colors.DEFAULT_WHITE} size={20}/>
-                                    <Text style={styles.checkoutText}>Checkout</Text>
+                                    <Text 
+                                        style={styles.checkoutText} 
+                                        onPress={() => navigation.navigate("PayPal", {totalUSD: totalUSD, userId: user._id})}
+
+                                    >
+                                        Checkout
+                                    </Text>
                             </View>
                             <Text style={styles.checkoutText}>{total}</Text>
                         </TouchableOpacity>

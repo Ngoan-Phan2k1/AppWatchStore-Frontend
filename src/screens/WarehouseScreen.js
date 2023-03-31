@@ -84,7 +84,7 @@ const WarehouseScreen = ({navigation, route: {params: {warehouseId}}}) => {
     useEffect(() => {
         WarehouseService.getOneWarehouses(warehouseId).then(response => {
             setSelectedCategory(response?.data?.categories[0].name)
-           setSelectedIdCategory(response?.data?.categories[0]._id)
+            setSelectedIdCategory(response?.data?.categories[0]._id)
             
             setWarehouse(response?.data)
         })
@@ -183,17 +183,23 @@ const WarehouseScreen = ({navigation, route: {params: {warehouseId}}}) => {
                         </View>
 
                         <View style={styles.productList}>
-                            {warehouse?.products?.filter(product => product?.category === selectedIdCategory)
-                            ?.map(item => (
+                            {warehouse?.products.filter(product => product?.category === selectedIdCategory)
+                            ?.map(item => 
+                                
+                                                                                             
+                                (
                                 <ProductCard 
                                     key={item?._id} 
-                                    {...item} 
+                                    //{...item}
+                                    props={item}
+                                    location={warehouse} 
                                     navigate={() => 
-                                        navigation.navigate("Product", {id: item?._id})}
+                                        navigation.navigate("Product", {id: item?._id, location: warehouse?.location, warehouseId: warehouseId})}
 
                                     //navigate={(id) => navigation.navigate("Product", {id})}
                                 />
-                            ))}
+                            
+                                ))}
 
                             <Separator height={Display.setHeight(2)}/>
                         </View>    

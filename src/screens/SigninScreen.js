@@ -8,7 +8,7 @@ import { Display } from "../utils";
 import { AuthenticationService, StorageService, UserService } from "../services";
 import LottieView from "lottie-react-native";
 import {useDispatch, useSelector, connect} from "react-redux";
-import {GeneralAction} from "../actions"
+import {GeneralAction} from "../actions";
 
 const SigninScreen = ({navigation, setToken}) => {
     const [isPaswordShow, setIsPaswordShow] = useState(false);

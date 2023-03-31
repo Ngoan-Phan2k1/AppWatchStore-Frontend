@@ -7,6 +7,7 @@ import WarehouseCard from "./WarehouseCard";
 import WarehouseMedium from "./WarehouseMediumCard";
 import CategoryListItem from "./CategoryListItem";
 import ProductCard from "./ProductCard";
+import BookmarkCard from "./BookmarkCard";
 
 export {
     WelcomeCard, 
@@ -18,4 +19,5 @@ export {
     WarehouseMedium,
     CategoryListItem,
     ProductCard,
+    BookmarkCard
 };

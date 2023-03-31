@@ -28,11 +28,11 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Feather from "react-native-vector-icons/Feather";
 import { Colors, Fonts, Images, Mock } from "../contants";
 import { Display } from "../utils";
-import {ProductService} from "../services";
 import LottieView from "lottie-react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { FlatList } from "react-native-gesture-handler";
 import AntDesign from "react-native-vector-icons/AntDesign";
+import { AuthenticationService, WarehouseService, ProductService, UserService } from "../services";
 
 
 import {useDispatch, useSelector} from "react-redux";
@@ -80,13 +80,14 @@ const renderProduct = ({item, index}) => {
 
 
 
-const ProductScreen = ({navigation ,route: {params: {id}}}) => {
+const ProductScreen = ({navigation ,route: {params: {id, location, warehouseId}}}) => {
+    const [warehouse, setWarehouse] = useState(null);
 
     const [product, setProduct] = useState(null);
     const [selectedSubMenu, setSelectedSubMenu] = useState("Details");
     const dispatch = useDispatch();
 
-    const itemCount = useSelector(state => state?.cartState?.cart?.find(item => item?._id === id)?.quantity)
+    const itemCount = useSelector(state => state?.cartState?.cart?.find(item => item?._id === id && item?.location?._id === warehouseId)?.quantity)
 
 
     const width = Dimensions.get('window').width;
@@ -95,24 +96,33 @@ const ProductScreen = ({navigation ,route: {params: {id}}}) => {
     let position = Animated.divide(scrollX, width)
 
 
-    // console.log("product: ", product);
+    //console.log("id: ", warehouseId);
 
 
     useEffect(() => {
         ProductService.getOneProduct(id).then(productRes => {
             setProduct(productRes?.data)
         })
+
+        WarehouseService.getOneWarehouses(warehouseId).then(warehouseRes => {
+            //console.log(warehouseRes?.data);
+            setWarehouse(warehouseRes?.data)
+        })
+
+
     }, [])
+
+    //console.log("warehouse: ", warehouse?._id);
 
     
 
-    const addToCart = (props) => {
+    const addToCart = (props, warehouse) => {
         //console.log("Prop: ", props);
-       dispatch(CartAction.addCart(props))  
+       dispatch(CartAction.addCart(props, warehouse))  
     }
 
-    const removeFromCart = (props) => dispatch(
-        CartAction.removeCart(props)
+    const removeFromCart = (props, warehouse) => dispatch(
+        CartAction.removeCart(props, warehouse)
     )
 
     
@@ -145,15 +155,17 @@ const ProductScreen = ({navigation ,route: {params: {id}}}) => {
             <Separator height={StatusBar.currentHeight}/>
 
 
-            <ScrollView>
+            {/* <ScrollView> */}
                 <View style={{
                     width: '100%',
-                    borderBottomRightRadius: 20,
-                    borderBottomLeftRadius: 20,
+                    // borderBottomRightRadius: 20,
+                    // borderBottomLeftRadius: 20,
                     position: "relative",
                     alignItems: "center",
                     marginBottom: 4,
-                    backgroundColor: Colors.DEFAULT_GREY
+                    //marginBottom: 200,
+                    backgroundColor: Colors.DEFAULT_WHITE,
+
                 }}>
                     <View 
                         style={{
@@ -165,7 +177,7 @@ const ProductScreen = ({navigation ,route: {params: {id}}}) => {
                         }}
                     >
                         <TouchableOpacity>
-                            <Entypo style={styles.icon} name="chevron-left"/>
+                            <Entypo style={styles.icon} name="chevron-left" onPress={() => navigation.goBack()}/>
                         </TouchableOpacity>
                     </View>
 
@@ -183,6 +195,11 @@ const ProductScreen = ({navigation ,route: {params: {id}}}) => {
                             [{nativeEvent: {contentOffset: {x:scrollX}}}],
                             {useNativeDriver: false},
                         )}
+                        style={{
+                            
+                        }}
+                        
+                        
                     />
 
                     <View
@@ -242,6 +259,9 @@ const ProductScreen = ({navigation ,route: {params: {id}}}) => {
                 </View> */}
 
 
+
+
+            <ScrollView>    
                 {/* <Separator height={Display.setWidth(100)}/> */}
                  <View style={styles.mainContainer}>
                     <View style={styles.titleHeaderContainer}>
@@ -302,25 +322,23 @@ const ProductScreen = ({navigation ,route: {params: {id}}}) => {
 
                         {/* Sau nay sua lai cho data ware house */}
                         <Text style={styles.detailHeader}>Warehouse</Text>
-                        <Text style={styles.detailContent}>Details warehouse</Text>
-
-
+                        <Text style={styles.detailContent}>{location}</Text>
 
                         { product?.desription ? (
                             <>
                                 <Text style={styles.detailHeader}>Description</Text>
-                                <Text style={styles.detailContent}>{product?.desription}</Text>
+                                <Text style={styles.detailContent}>{product?.description}</Text>
                             </>)
                             : null
                         }
 
-                        {/* Sau nay sua lai cho data ware house */}
-                        <Text style={styles.detailHeader}>Warehouse</Text>
-                        <Text style={styles.detailContent}>Details warehouse</Text>
                     </View>
 
 
                 </View>
+
+                <Separator height={Display.setHeight(10)}/>
+
 
             </ScrollView>
 
@@ -331,7 +349,7 @@ const ProductScreen = ({navigation ,route: {params: {id}}}) => {
                         name="minus"
                         color={Colors.DEFAULT_YELLOW}
                         size={18}
-                        onPress={() => removeFromCart(product)}
+                        onPress={() => removeFromCart(product, warehouse)}
                     />
                     <Text style={styles.itemCountText}>{itemCount ? itemCount : 0}</Text>                                                                                                               
 
@@ -339,13 +357,13 @@ const ProductScreen = ({navigation ,route: {params: {id}}}) => {
                         name="plus"
                         color={Colors.DEFAULT_YELLOW}
                         size={18}
-                        onPress={() => addToCart(product)}
+                        onPress={() => addToCart(product, warehouse)}
                     />
                 </View>
 
                 <TouchableOpacity 
                     style={styles.cartButton} 
-                    onPress={() => navigation.navigate("Cart")}
+                    onPress={() => navigation.navigate("Cart", {warehouseId: warehouseId})}
                     activeOpacity={0.8}
                 >
                     <Text style={styles.cartButtonText}>Go to Cart</Text>
@@ -362,10 +380,10 @@ const styles = StyleSheet.create({
         flex: 1,
         // backgroundColor: Colors.DEFAULT_WHITE,
 
-        width: Display.setWidth(100),
-        height: Display.setHeight(100),
+        // width: Display.setWidth(100),
+        // height: Display.setHeight(100),
         backgroundColor: Colors.DEFAULT_WHITE,
-        position: "relative"
+        //position: "relative"
 
 
        
@@ -380,6 +398,8 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.DEFAULT_WHITE,
         borderTopLeftRadius: 32,
         borderTopRightRadius: 32,
+        flex: 1,
+
     },
     titleHeaderContainer: {
         flexDirection: "row",

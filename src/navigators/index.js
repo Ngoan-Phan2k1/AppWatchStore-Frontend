@@ -12,6 +12,7 @@ import {
     HomeScreen,
     WarehouseScreen,
     ProductScreen,
+    PayPalScreen,
 
 } from '../screens';
 import HomeTabs from "./BottomTabs";
@@ -57,6 +58,7 @@ const Navigators = ({token}) => {
                             {/* <Stack.Screen name="Home" component={HomeScreen}/> */}
                             <Stack.Screen name="Warehouse" component={WarehouseScreen}/>
                             <Stack.Screen name="Product" component={ProductScreen}/>
+                            <Stack.Screen name="PayPal" component={PayPalScreen}/>
                         </>
                         
                         )

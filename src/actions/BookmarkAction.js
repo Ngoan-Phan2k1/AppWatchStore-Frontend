@@ -2,11 +2,11 @@ import {UserService} from "../services";
 
 const types = {
     
-    GET_CART_ITEMS: "GET_CART_ITEMS",
+    GET_BOOKMARKS: "GET_BOOKMARKS",
     SET_IS_LOADING: "SET_IS_LOADING",
 }
 
-const addCart = (product, location) => {
+const addBookmark = (product, location) => {
 
     //console.log("PRODUCT: ", product);
     return (dispatch) => {
@@ -14,13 +14,13 @@ const addCart = (product, location) => {
             type: types.SET_IS_LOADING,
             payload: true,
         })
-        UserService.addToCart(product, location).then(cartResponse => {
+        UserService.addBookmark(product, location).then(bookmarkRes => {
 
-            //console.log("Cart Res: ", cartResponse?.data?.cart)
+            //console.log("Bookmark Res: ", bookmarkRes?.data?.bookmark)
 
             dispatch({
-                type: types.GET_CART_ITEMS,
-                payload: cartResponse?.data?.cart
+                type: types.GET_BOOKMARKS,
+                payload: bookmarkRes?.data?.bookmark
             });
             dispatch({
                 type: types.SET_IS_LOADING,
@@ -37,19 +37,19 @@ const addCart = (product, location) => {
 }
 
 
-const removeCart = (product, location) => {
+const removeBookmark = (product, location) => {
     return (dispatch) => {
         dispatch({
             type: types.SET_IS_LOADING,
             payload: true,
         })
-        UserService.removeFromCart(product, location).then(cartResponse => {
+        UserService.removeBookmark(product, location).then(bookmarkRes => {
 
-            //console.log("Cart res: ", cartResponse?.data?.cart)
+            //console.log("Bookmark res: ", bookmarkRes?.data?.bookmark)
 
             dispatch({
-                type: types.GET_CART_ITEMS,
-                payload: cartResponse?.data?.cart
+                type: types.GET_BOOKMARKS,
+                payload: bookmarkRes?.data?.bookmark
             });
             dispatch({
                 type: types.SET_IS_LOADING,
@@ -66,19 +66,18 @@ const removeCart = (product, location) => {
 }
 
 
-const getCartItems = () => {
+const getBookmarks = () => {
     return (dispatch) => {
         dispatch({
             type: types.SET_IS_LOADING,
             payload: true,
         })
-        UserService.getUserData().then(cartResponse => {
+        UserService.getBookmarks().then(bookmarkRes => {
 
-            // console.log("CART RESPONSE: ", cartResponse?.data?.cart)
 
             dispatch({
-                type: types.GET_CART_ITEMS,
-                payload: cartResponse?.data?.cart
+                type: types.GET_BOOKMARKS,
+                payload: bookmarkRes
             });
             dispatch({
                 type: types.SET_IS_LOADING,
@@ -94,4 +93,4 @@ const getCartItems = () => {
     }
 }
 
-export default {types, addCart, removeCart, getCartItems};
+export default {types, addBookmark, removeBookmark, getBookmarks};
